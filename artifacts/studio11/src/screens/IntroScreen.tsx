@@ -8,7 +8,7 @@ export default function IntroScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setAppScreen('gender');
+      setAppScreen('focus');
     }, 3000);
     return () => clearTimeout(timer);
   }, [setAppScreen]);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Check, Trash2, X, Plus, Scissors, Camera, ShoppingBag, Star } from 'lucide-react';
-import { useSessionStore, BottomTab } from '@/store/sessionStore';
+import { Check, Trash2, X, Plus, Scissors, Camera, ShoppingBag, Star, User, ScanFace, ShoppingCart, Gift, Calendar, ImageIcon } from 'lucide-react';
+import { useSessionStore, BottomTab, UserProfile } from '@/store/sessionStore';
 import { getServicesByGenderCategoryAndSubCategory, getServicesByGenderAndCategory } from '@/data/services';
 import { categoryTaglines, categoryGradients, MALE_CATEGORIES, FEMALE_CATEGORIES } from '@/data/categories';
 import { getSubCategories } from '@/data/categories';
@@ -10,6 +10,32 @@ import { useAccentColor } from '@/hooks/useAccentColor';
 import { useSwipe } from '@/hooks/useSwipe';
 import logoPath from '@assets/logo_transparent.png';
 
+/* ─── Service name bracket parser ─────────────────────────────────────────── */
+function ServiceNameDisplay({ name }: { name: string }) {
+  const match = name.match(/^(.*?)(\s*\(.*\))\s*$/);
+  if (!match) return <span>{name}</span>;
+  return (
+    <>
+      <span>{match[1].trim()}</span>
+      <span
+        style={{
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
+          fontSize: '0.68em',
+          fontWeight: 400,
+          opacity: 0.52,
+          textTransform: 'lowercase',
+          letterSpacing: '0.03em',
+          display: 'block',
+          marginTop: '2px',
+        }}
+      >
+        {match[2].trim().toLowerCase()}
+      </span>
+    </>
+  );
+}
+
+/* ─── Root screen ──────────────────────────────────────────────────────────── */
 export default function MainScreen() {
   const { gender, activeCategory, setActiveCategory, activeBottomTab } = useSessionStore();
   const cats = gender === 'MALE' ? MALE_CATEGORIES : FEMALE_CATEGORIES;
@@ -47,40 +73,43 @@ export default function MainScreen() {
       <ServiceDrawer />
       <DecisionModal />
       <SessionDrawer />
+      <ProfileDrawer />
       <CategoryStoryIntro />
     </div>
   );
 }
 
+/* ─── Header ───────────────────────────────────────────────────────────────── */
 function Header() {
-  const { gender, setGender, itemCount, totalPrice, setSessionDrawerOpen } = useSessionStore();
+  const { gender, setGender, itemCount, totalPrice, setSessionDrawerOpen, setProfileDrawerOpen } = useSessionStore();
   const { accent, accentGlow } = useAccentColor();
   const count = itemCount();
-  const total = totalPrice();
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-[64px] bg-black/60 backdrop-blur-2xl border-b border-white/10 z-50 flex items-center justify-between px-4 md:px-6">
+    <div className="fixed top-0 left-0 right-0 h-[58px] bg-black/65 backdrop-blur-2xl border-b border-white/10 z-50 flex items-center justify-between px-4 md:px-5">
+      {/* Logo */}
       <div className="flex items-center gap-2 shrink-0">
         <img
           src={logoPath}
           alt="Studio11"
-          className="h-10 w-auto object-contain drop-shadow-[0_0_12px_rgba(212,175,55,0.4)]"
+          className="h-7 w-auto object-contain drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]"
         />
         <span
-          className="text-white tracking-[0.35em] uppercase text-base font-semibold hidden sm:block"
+          className="text-white tracking-[0.32em] uppercase text-[13px] font-semibold hidden sm:block"
           style={{ fontFamily: "'Bodoni Moda', serif" }}
         >
           STUDIO11
         </span>
       </div>
 
+      {/* Gender toggle */}
       <div className="flex items-center bg-white/5 border border-white/10 rounded-full p-1 shrink-0">
         {(['MALE', 'FEMALE'] as const).map(g => (
           <button
             key={g}
             data-testid={`button-header-gender-${g}`}
             onClick={() => setGender(g)}
-            className="px-3 py-1 text-[10px] md:text-xs rounded-full uppercase tracking-widest transition-all"
+            className="px-3 py-1 text-[9px] md:text-[10px] rounded-full uppercase tracking-widest transition-all"
             style={{
               fontFamily: "'Plus Jakarta Sans', sans-serif",
               background: gender === g ? accent : 'transparent',
@@ -94,33 +123,41 @@ function Header() {
         ))}
       </div>
 
-      <button
-        data-testid="button-session"
-        onClick={() => setSessionDrawerOpen(true)}
-        className="flex items-center gap-3 shrink-0 group hover:scale-105 transition-transform"
-      >
-        <div className="flex-col items-end hidden md:flex">
-          <span className="text-[10px] text-white/60 uppercase tracking-widest" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>My Session</span>
-          {count > 0 && (
-            <span className="text-xs font-medium tracking-wider" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: accent }}>
-              ₹{total.toLocaleString('en-IN')}
-            </span>
-          )}
-        </div>
-        <div
-          className="relative w-10 h-10 rounded-full border flex items-center justify-center bg-white/5 transition-colors"
-          style={{ borderColor: count > 0 ? `${accent}40` : 'rgba(255,255,255,0.2)' }}
+      {/* Right icons: profile + cart */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Profile icon */}
+        <button
+          data-testid="button-profile"
+          onClick={() => setProfileDrawerOpen(true)}
+          className="relative w-9 h-9 rounded-full border flex items-center justify-center transition-all glass-l2"
+          style={{ borderColor: 'rgba(255,255,255,0.18)' }}
         >
-          <span className="text-white text-xs font-medium" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{count}</span>
+          <User size={16} style={{ color: 'rgba(255,255,255,0.7)' }} />
+        </button>
+
+        {/* Cart / session icon */}
+        <button
+          data-testid="button-session"
+          onClick={() => setSessionDrawerOpen(true)}
+          className="relative w-9 h-9 rounded-full border flex items-center justify-center transition-all glass-l2"
+          style={{ borderColor: count > 0 ? `${accent}50` : 'rgba(255,255,255,0.18)' }}
+        >
+          <ShoppingCart size={16} style={{ color: count > 0 ? accent : 'rgba(255,255,255,0.7)' }} />
           {count > 0 && (
-            <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full shadow-lg" style={{ background: accent, boxShadow: accentGlow }} />
+            <div
+              className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+              style={{ background: accent, color: '#0B0B0F', boxShadow: accentGlow }}
+            >
+              {count}
+            </div>
           )}
-        </div>
-      </button>
+        </button>
+      </div>
     </div>
   );
 }
 
+/* ─── Sparkle particles ────────────────────────────────────────────────────── */
 function Sparkle({ color, count = 6 }: { color: string; count?: number }) {
   const POSITIONS = [
     { left: '15%', top: '20%', dx: '-8px', dy: '-12px', delay: 0 },
@@ -156,12 +193,13 @@ function Sparkle({ color, count = 6 }: { color: string; count?: number }) {
   );
 }
 
+/* ─── Category tabs — Level 1 (deepest glass) ─────────────────────────────── */
 function CategoryTabs({ cats }: { cats: string[] }) {
   const { activeCategory, setActiveCategory } = useSessionStore();
   const { accent } = useAccentColor();
 
   return (
-    <div className="pt-[64px] flex-none border-b border-white/10 bg-black/40 backdrop-blur-md relative z-40">
+    <div className="pt-[58px] flex-none border-b border-white/10 bg-black/40 backdrop-blur-md relative z-40">
       <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-4 py-3 gap-3">
         {cats.map(cat => {
           const isActive = activeCategory === cat;
@@ -170,19 +208,19 @@ function CategoryTabs({ cats }: { cats: string[] }) {
               key={cat}
               data-testid={`tab-category-${cat}`}
               onClick={() => setActiveCategory(cat as any)}
-              className={`shrink-0 rounded-full px-4 py-2 text-[9px] uppercase tracking-[0.18em] transition-all duration-300 relative overflow-hidden ${isActive ? 'liquid-glass-accent' : 'liquid-glass'}`}
+              className="shrink-0 rounded-full px-4 py-2 text-[9px] uppercase tracking-[0.18em] transition-all duration-300 relative overflow-hidden glass-l1"
               style={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
                 background: isActive
                   ? `linear-gradient(135deg, ${accent}55 0%, ${accent}22 100%)`
-                  : undefined,
+                  : 'linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 100%)',
                 color: isActive ? accent : 'rgba(255,255,255,0.6)',
                 fontWeight: isActive ? 700 : 400,
-                borderColor: isActive ? `${accent}50` : 'rgba(255,255,255,0.15)',
+                borderColor: isActive ? `${accent}55` : 'rgba(255,255,255,0.22)',
                 transform: isActive ? 'scale(1.06)' : 'scale(1)',
                 boxShadow: isActive
-                  ? `0 0 16px ${accent}33, inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.1)`
-                  : 'inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 16px rgba(0,0,0,0.2)',
+                  ? `0 12px 40px ${accent}22, inset 0 3px 0 rgba(255,255,255,0.30), inset 0 -3px 0 rgba(0,0,0,0.22), inset 3px 0 0 rgba(255,255,255,0.10), inset -3px 0 0 rgba(0,0,0,0.10)`
+                  : '0 12px 40px rgba(0,0,0,0.45), inset 0 3px 0 rgba(255,255,255,0.28), inset 0 -3px 0 rgba(0,0,0,0.22), inset 3px 0 0 rgba(255,255,255,0.10), inset -3px 0 0 rgba(0,0,0,0.10)',
               }}
             >
               {isActive && <Sparkle color={accent} count={5} />}
@@ -195,9 +233,10 @@ function CategoryTabs({ cats }: { cats: string[] }) {
   );
 }
 
+/* ─── Sub-category tabs — Level 2 (medium glass) ──────────────────────────── */
 function SubCategoryTabs() {
   const { gender, activeCategory, activeSubCategory, setActiveSubCategory } = useSessionStore();
-  const { accent, accentMuted, accentBorder } = useAccentColor();
+  const { accent } = useAccentColor();
 
   const subCats = getSubCategories(gender, activeCategory);
 
@@ -219,18 +258,18 @@ function SubCategoryTabs() {
               key={sub}
               data-testid={`tab-subcategory-${sub}`}
               onClick={() => setActiveSubCategory(sub)}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-[9px] uppercase tracking-[0.15em] transition-all duration-200 relative overflow-hidden ${isActive ? 'liquid-glass-accent' : 'liquid-glass'}`}
+              className="shrink-0 rounded-full px-4 py-1.5 text-[9px] uppercase tracking-[0.15em] transition-all duration-200 relative overflow-hidden glass-l2"
               style={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
                 background: isActive
                   ? `linear-gradient(135deg, ${accent}40 0%, ${accent}18 100%)`
-                  : undefined,
+                  : 'linear-gradient(160deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 100%)',
                 color: isActive ? accent : 'rgba(255,255,255,0.42)',
                 fontWeight: isActive ? 600 : 400,
-                borderColor: isActive ? `${accent}45` : 'rgba(255,255,255,0.10)',
+                borderColor: isActive ? `${accent}45` : 'rgba(255,255,255,0.16)',
                 boxShadow: isActive
-                  ? `0 0 12px ${accent}28, inset 0 1px 0 rgba(255,255,255,0.25)`
-                  : 'inset 0 1px 0 rgba(255,255,255,0.08)',
+                  ? `0 6px 22px ${accent}20, inset 0 2px 0 rgba(255,255,255,0.22), inset 0 -2px 0 rgba(0,0,0,0.15)`
+                  : '0 6px 22px rgba(0,0,0,0.32), inset 0 2px 0 rgba(255,255,255,0.22), inset 0 -2px 0 rgba(0,0,0,0.15), inset 2px 0 0 rgba(255,255,255,0.06), inset -2px 0 0 rgba(0,0,0,0.06)',
               }}
             >
               {isActive && <Sparkle color={accent} count={4} />}
@@ -243,8 +282,9 @@ function SubCategoryTabs() {
   );
 }
 
+/* ─── Cinematic / media area ───────────────────────────────────────────────── */
 function CinematicArea() {
-  const { activeCategory } = useSessionStore();
+  const { activeCategory, activeSubCategory } = useSessionStore();
   const { accent } = useAccentColor();
   const gradient = categoryGradients[activeCategory];
   const tagline = categoryTaglines[activeCategory];
@@ -262,8 +302,10 @@ function CinematicArea() {
           transition={{ duration: 0.8 }}
         />
       </AnimatePresence>
-      <div className="absolute inset-0 bg-black/40 z-0" />
-      <div className="relative z-10 flex flex-col items-center text-center px-4">
+      <div className="absolute inset-0 bg-black/45 z-0" />
+
+      {/* Main category title */}
+      <div className="relative z-10 flex flex-col items-center text-center px-4 w-full">
         <h2
           className="text-4xl md:text-5xl text-white/10 uppercase tracking-widest select-none pointer-events-none w-full leading-none"
           style={{ fontFamily: "'Bodoni Moda', serif" }}
@@ -277,18 +319,40 @@ function CinematicArea() {
           {tagline}
         </p>
       </div>
-      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent to-transparent z-10" style={{ backgroundImage: `linear-gradient(to right, transparent, ${accent}60, transparent)` }} />
+
+      {/* Media placeholder badge */}
+      <div
+        className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full"
+        style={{
+          background: 'rgba(0,0,0,0.45)',
+          border: '1px dashed rgba(255,255,255,0.18)',
+          backdropFilter: 'blur(8px)',
+        }}
+      >
+        <ImageIcon size={10} style={{ color: `${accent}80` }} />
+        <span
+          className="text-[8px] uppercase tracking-[0.15em]"
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.35)' }}
+        >
+          {activeSubCategory || activeCategory} media
+        </span>
+      </div>
+
+      <div className="absolute bottom-0 left-0 w-full h-[1px] z-10" style={{ backgroundImage: `linear-gradient(to right, transparent, ${accent}60, transparent)` }} />
     </div>
   );
 }
 
+/* ─── Service list — Level 3 (subtlest glass) ──────────────────────────────── */
 function ServiceList() {
-  const { gender, activeCategory, activeSubCategory, selectService, selectedService, itemCount, sessionDrawerOpen } = useSessionStore();
+  const { gender, activeCategory, activeSubCategory, selectService, selectedService, sessionItems, itemCount, sessionDrawerOpen } = useSessionStore();
   const { accent, accentMuted, accentBorder } = useAccentColor();
 
   const services = activeSubCategory
     ? getServicesByGenderCategoryAndSubCategory(gender, activeCategory, activeSubCategory)
     : getServicesByGenderAndCategory(gender, activeCategory);
+
+  const sessionIds = new Set(sessionItems.map(i => i.service.id));
 
   const steps = ['DISCOVER', 'BUILD SESSION', 'REVIEW', 'BOOK'];
   let activeIdx = 0;
@@ -296,8 +360,8 @@ function ServiceList() {
   if (sessionDrawerOpen) activeIdx = 2;
 
   return (
-    <div className="flex-1 overflow-y-auto pb-[68px]">
-      {/* Inline progress strip */}
+    <div className="flex-1 overflow-y-auto pb-[72px]">
+      {/* Progress strip */}
       <div className="flex items-center justify-center gap-3 py-3 border-b border-white/5 bg-black/20">
         {steps.map((step, idx) => {
           const isActive = idx === activeIdx;
@@ -317,7 +381,7 @@ function ServiceList() {
                 style={{
                   fontFamily: "'Plus Jakarta Sans', sans-serif",
                   color: isActive ? accent : isPast ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.25)',
-                  display: isActive ? 'block' : idx > 0 ? 'none' : 'none',
+                  display: isActive ? 'block' : 'none',
                 }}
               >
                 {step}
@@ -327,44 +391,78 @@ function ServiceList() {
         })}
       </div>
 
+      {/* Service cards — glass-l3 */}
       <AnimatePresence mode="popLayout">
         {services.map((service, i) => {
           const isSelected = selectedService?.id === service.id;
+          const isInSession = sessionIds.has(service.id);
           const hasSelection = !!selectedService;
+
           return (
             <motion.div
               key={service.id}
               layout
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: hasSelection && !isSelected ? 0.45 : 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ delay: i * 0.04 }}
               whileTap={{ scale: 0.99 }}
               onClick={() => selectService(service)}
               data-testid={`card-service-${service.id}`}
-              className="relative cursor-pointer border-b py-4 px-6 flex items-center justify-between transition-all duration-300"
+              className="relative cursor-pointer mx-3 my-2 px-4 py-4 rounded-2xl flex items-center gap-3 transition-all duration-300 glass-l3"
               style={{
-                borderColor: isSelected ? `${accentBorder}` : 'rgba(255,255,255,0.06)',
-                background: isSelected ? accentMuted : 'transparent',
-                boxShadow: isSelected ? `inset 0 0 20px ${accent}08` : 'none',
+                background: isSelected
+                  ? `linear-gradient(135deg, ${accent}18 0%, ${accent}06 100%)`
+                  : isInSession
+                    ? 'linear-gradient(160deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%)'
+                    : 'linear-gradient(160deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.015) 100%)',
+                borderColor: isSelected ? `${accent}45` : isInSession ? `${accent}25` : 'rgba(255,255,255,0.10)',
+                boxShadow: isSelected
+                  ? `0 4px 20px ${accent}20, inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(0,0,0,0.14)`
+                  : '0 3px 14px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -1px 0 rgba(0,0,0,0.10)',
               }}
             >
-              <div className="absolute left-0 top-0 bottom-0 w-[2px]" style={{ background: isSelected ? accent : `${accent}30` }} />
-              <div className="flex flex-col ml-4">
+              {/* Tick / checkbox */}
+              <div
+                className="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-200"
+                style={{
+                  borderColor: isInSession ? accent : isSelected ? `${accent}80` : 'rgba(255,255,255,0.22)',
+                  background: isInSession
+                    ? accent
+                    : isSelected
+                      ? `${accent}20`
+                      : 'rgba(255,255,255,0.04)',
+                }}
+              >
+                {isInSession && <Check size={12} style={{ color: '#0B0B0F' }} strokeWidth={3} />}
+                {isSelected && !isInSession && <Check size={12} style={{ color: accent }} strokeWidth={2} />}
+              </div>
+
+              {/* Name */}
+              <div className="flex flex-col flex-1 min-w-0">
                 <h3
-                  className="text-base text-white uppercase tracking-wide"
+                  className="text-[15px] text-white leading-tight"
                   style={{ fontFamily: "'Bodoni Moda', serif" }}
                 >
-                  {service.name}
+                  <ServiceNameDisplay name={service.name} />
                 </h3>
                 <p
-                  className="text-[10px] mt-0.5 uppercase tracking-[0.12em]"
+                  className="text-[9px] mt-1 uppercase tracking-[0.14em]"
                   style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: `${accent}60` }}
                 >
-                  Tap to explore
+                  {isInSession ? 'In session' : 'Tap to explore'}
                 </p>
               </div>
-              <ChevronRight size={18} className="shrink-0" style={{ color: isSelected ? accent : 'rgba(255,255,255,0.25)' }} />
+
+              {/* Right tick indicator for in-session */}
+              {isInSession && (
+                <div
+                  className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                  style={{ background: `${accent}20` }}
+                >
+                  <Check size={10} style={{ color: accent }} strokeWidth={2.5} />
+                </div>
+              )}
             </motion.div>
           );
         })}
@@ -373,19 +471,21 @@ function ServiceList() {
   );
 }
 
+/* ─── Bottom nav — liquid glass tabs ──────────────────────────────────────── */
 function BottomNav() {
   const { activeBottomTab, setActiveBottomTab } = useSessionStore();
   const { accent } = useAccentColor();
 
   const tabs: { key: BottomTab; label: string; icon: React.ReactNode }[] = [
-    { key: 'menu', label: 'Menu', icon: <Scissors size={20} /> },
-    { key: 'ourwork', label: 'Our Work', icon: <Camera size={20} /> },
-    { key: 'products', label: 'Products', icon: <ShoppingBag size={20} /> },
-    { key: 'rewards', label: 'Rewards', icon: <Star size={20} /> },
+    { key: 'menu', label: 'Menu', icon: <Scissors size={18} /> },
+    { key: 'ourwork', label: 'Our Work', icon: <Camera size={18} /> },
+    { key: 'selfie', label: 'Selfie', icon: <ScanFace size={18} /> },
+    { key: 'products', label: 'Products', icon: <ShoppingBag size={18} /> },
+    { key: 'rewards', label: 'Rewards', icon: <Star size={18} /> },
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-[64px] bg-black/85 backdrop-blur-2xl border-t border-white/10 z-40 flex items-center justify-around px-2">
+    <div className="fixed bottom-0 left-0 right-0 h-[66px] bg-black/70 backdrop-blur-2xl border-t border-white/10 z-40 flex items-center justify-around px-2 gap-1">
       {tabs.map(tab => {
         const isActive = activeBottomTab === tab.key;
         return (
@@ -393,17 +493,25 @@ function BottomNav() {
             key={tab.key}
             data-testid={`bottom-tab-${tab.key}`}
             onClick={() => setActiveBottomTab(tab.key)}
-            className="flex flex-col items-center gap-1 py-1 px-3 transition-all duration-200"
-            style={{ color: isActive ? accent : 'rgba(255,255,255,0.35)' }}
+            className="flex flex-col items-center gap-0.5 py-1.5 px-2.5 rounded-2xl transition-all duration-200 relative overflow-hidden flex-1 glass-l2"
+            style={{
+              background: isActive
+                ? `linear-gradient(135deg, ${accent}30 0%, ${accent}10 100%)`
+                : 'linear-gradient(160deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%)',
+              color: isActive ? accent : 'rgba(255,255,255,0.35)',
+              borderColor: isActive ? `${accent}35` : 'rgba(255,255,255,0.10)',
+              boxShadow: isActive
+                ? `0 6px 22px ${accent}15, inset 0 2px 0 rgba(255,255,255,0.22), inset 0 -2px 0 rgba(0,0,0,0.15)`
+                : '0 4px 16px rgba(0,0,0,0.28), inset 0 2px 0 rgba(255,255,255,0.14), inset 0 -2px 0 rgba(0,0,0,0.10)',
+            }}
           >
-            <div style={{ filter: isActive ? `drop-shadow(0 0 6px ${accent}88)` : 'none' }}>
+            <div style={{ filter: isActive ? `drop-shadow(0 0 5px ${accent}99)` : 'none' }}>
               {tab.icon}
             </div>
             <span
-              className="text-[9px] uppercase tracking-[0.12em]"
+              className="text-[8px] uppercase tracking-[0.1em] leading-none"
               style={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
-                color: isActive ? accent : 'rgba(255,255,255,0.35)',
                 fontWeight: isActive ? 600 : 400,
               }}
             >
@@ -416,6 +524,7 @@ function BottomNav() {
   );
 }
 
+/* ─── Coming soon placeholder ──────────────────────────────────────────────── */
 function ComingSoonScreen() {
   const { activeBottomTab } = useSessionStore();
   const { accent } = useAccentColor();
@@ -425,10 +534,19 @@ function ComingSoonScreen() {
     ourwork: 'Our Work',
     products: 'Products',
     rewards: 'Rewards',
+    selfie: 'Selfie Studio',
+  };
+
+  const icons: Record<BottomTab, React.ReactNode> = {
+    menu: <Scissors size={28} />,
+    ourwork: <Camera size={28} />,
+    products: <ShoppingBag size={28} />,
+    rewards: <Star size={28} />,
+    selfie: <ScanFace size={28} />,
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center pt-[64px] pb-[64px] bg-[#0B0B0F]">
+    <div className="flex-1 flex flex-col items-center justify-center pt-[58px] pb-[66px] bg-[#0B0B0F]">
       <motion.div
         className="flex flex-col items-center text-center px-8"
         initial={{ opacity: 0, y: 20 }}
@@ -437,9 +555,9 @@ function ComingSoonScreen() {
       >
         <div
           className="w-16 h-16 rounded-full flex items-center justify-center mb-6 border"
-          style={{ background: `${accent}10`, borderColor: `${accent}30` }}
+          style={{ background: `${accent}10`, borderColor: `${accent}30`, color: accent }}
         >
-          <Star size={28} style={{ color: accent }} />
+          {icons[activeBottomTab]}
         </div>
         <h2
           className="text-3xl text-white mb-3 uppercase tracking-[0.3em]"
@@ -465,6 +583,7 @@ function ComingSoonScreen() {
   );
 }
 
+/* ─── Service detail drawer ────────────────────────────────────────────────── */
 function ServiceDrawer() {
   const { drawerOpen, setDrawerOpen, selectedService, addToSession, sessionItems } = useSessionStore();
   const { accent, accentGlow } = useAccentColor();
@@ -532,7 +651,7 @@ function ServiceDrawer() {
                 </span>
                 <span
                   className="text-2xl font-semibold"
-                  style={{ fontFamily: "'Bodoni Moda', serif", color: selectedService.price === 0 ? accent : accent }}
+                  style={{ fontFamily: "'Bodoni Moda', serif", color: accent }}
                 >
                   {displayPrice}
                 </span>
@@ -600,6 +719,7 @@ function ServiceDrawer() {
   );
 }
 
+/* ─── Decision / upsell modal ──────────────────────────────────────────────── */
 function DecisionModal() {
   const { showDecisionModal, setShowDecisionModal, lastAddedService, gender, sessionItems, addToSession, setSessionDrawerOpen } = useSessionStore();
   const { accent, accentMuted, accentGlow } = useAccentColor();
@@ -710,6 +830,7 @@ function DecisionModal() {
   );
 }
 
+/* ─── Session drawer (cart) ────────────────────────────────────────────────── */
 function SessionDrawer() {
   const { sessionDrawerOpen, setSessionDrawerOpen, sessionItems, removeFromSession, totalPrice, totalDuration } = useSessionStore();
   const { accent, accentGlow } = useAccentColor();
@@ -831,6 +952,219 @@ function SessionDrawer() {
   );
 }
 
+/* ─── Profile drawer ───────────────────────────────────────────────────────── */
+function ProfileDrawer() {
+  const { profileDrawerOpen, setProfileDrawerOpen, userProfile, setUserProfile, setGender } = useSessionStore();
+  const { accent, accentGlow } = useAccentColor();
+
+  const [name, setName] = useState(userProfile?.name ?? '');
+  const [phone, setPhone] = useState(userProfile?.phone ?? '');
+  const [birthday, setBirthday] = useState(userProfile?.birthday ?? '');
+  const [anniversary, setAnniversary] = useState(userProfile?.anniversary ?? '');
+
+  useEffect(() => {
+    if (profileDrawerOpen) {
+      setName(userProfile?.name ?? '');
+      setPhone(userProfile?.phone ?? '');
+      setBirthday(userProfile?.birthday ?? '');
+      setAnniversary(userProfile?.anniversary ?? '');
+    }
+  }, [profileDrawerOpen, userProfile]);
+
+  const isSpecialDay = (dateStr: string) => {
+    if (!dateStr) return false;
+    const today = new Date();
+    const d = new Date(dateStr);
+    const diff = (new Date(today.getFullYear(), d.getMonth(), d.getDate()).getTime() - new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()) / 86400000;
+    return diff >= 0 && diff <= 30;
+  };
+
+  const bdaySoon = isSpecialDay(birthday);
+  const anniSoon = isSpecialDay(anniversary);
+  const hasDiscount = bdaySoon || anniSoon;
+
+  const handleSave = () => {
+    const updated: UserProfile = {
+      name,
+      phone,
+      birthday,
+      anniversary,
+      focus: userProfile?.focus ?? 'FEMALE',
+    };
+    setUserProfile(updated);
+    setProfileDrawerOpen(false);
+  };
+
+  const inputStyle: React.CSSProperties = {
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    background: 'rgba(255,255,255,0.06)',
+    border: '1px solid rgba(255,255,255,0.12)',
+    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)',
+    colorScheme: 'dark' as any,
+  };
+
+  return (
+    <AnimatePresence>
+      {profileDrawerOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setProfileDrawerOpen(false)}
+            className="fixed inset-0 bg-black/65 backdrop-blur-sm z-[70]"
+          />
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 26, stiffness: 210 }}
+            className="fixed top-0 right-0 bottom-0 w-[min(360px,90vw)] bg-[#0E0E12] border-l border-white/10 z-[80] flex flex-col shadow-2xl overflow-hidden"
+            style={{ borderLeftColor: `${accent}15` }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 shrink-0">
+              <div>
+                <h2 className="text-xl text-white tracking-widest uppercase" style={{ fontFamily: "'Bodoni Moda', serif" }}>My Profile</h2>
+                <p className="text-[10px] mt-0.5 uppercase tracking-[0.15em]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: `${accent}70` }}>
+                  {userProfile?.name ? `Welcome, ${userProfile.name.split(' ')[0]}` : 'Personal details'}
+                </p>
+              </div>
+              <button onClick={() => setProfileDrawerOpen(false)} className="text-white/40 hover:text-white/70 transition-colors">
+                <X size={22} />
+              </button>
+            </div>
+
+            {/* 30% off banner */}
+            {hasDiscount && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mx-4 mt-4 px-4 py-3 rounded-2xl flex items-center gap-3"
+                style={{ background: `${accent}15`, border: `1px solid ${accent}35` }}
+              >
+                <Gift size={18} style={{ color: accent, flexShrink: 0 }} />
+                <div>
+                  <p className="text-xs font-semibold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: accent }}>
+                    30% Off Unlocked!
+                  </p>
+                  <p className="text-[10px] mt-0.5" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.5)' }}>
+                    {bdaySoon && 'Birthday'}{bdaySoon && anniSoon && ' & '}{anniSoon && 'Anniversary'} special within 30 days
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Form */}
+            <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-6 py-5 flex flex-col gap-4">
+              {/* Name */}
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.18em] mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.4)' }}>
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Your name"
+                  className="w-full rounded-xl px-4 py-3 text-white text-sm outline-none transition-all"
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = `${accent}50`)}
+                  onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
+                />
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.18em] mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.4)' }}>
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  placeholder="+91 ..."
+                  className="w-full rounded-xl px-4 py-3 text-white text-sm outline-none transition-all"
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = `${accent}50`)}
+                  onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
+                />
+              </div>
+
+              {/* Birthday */}
+              <div>
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.4)' }}>
+                  <Gift size={11} style={{ color: bdaySoon ? accent : 'rgba(255,255,255,0.4)' }} />
+                  Birthday
+                  {bdaySoon && <span className="text-[9px] px-1.5 py-0.5 rounded-full ml-1" style={{ background: `${accent}25`, color: accent }}>30% off</span>}
+                </label>
+                <input
+                  type="date"
+                  value={birthday}
+                  onChange={e => setBirthday(e.target.value)}
+                  className="w-full rounded-xl px-4 py-3 text-white text-sm outline-none transition-all"
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = `${accent}50`)}
+                  onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
+                />
+              </div>
+
+              {/* Anniversary */}
+              <div>
+                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.4)' }}>
+                  <Calendar size={11} style={{ color: anniSoon ? accent : 'rgba(255,255,255,0.4)' }} />
+                  Anniversary
+                  {anniSoon && <span className="text-[9px] px-1.5 py-0.5 rounded-full ml-1" style={{ background: `${accent}25`, color: accent }}>30% off</span>}
+                </label>
+                <input
+                  type="date"
+                  value={anniversary}
+                  onChange={e => setAnniversary(e.target.value)}
+                  className="w-full rounded-xl px-4 py-3 text-white text-sm outline-none transition-all"
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = `${accent}50`)}
+                  onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.12)')}
+                />
+              </div>
+
+              {/* Note about discount */}
+              {!hasDiscount && (birthday || anniversary) && (
+                <div
+                  className="flex items-start gap-2 px-3 py-2.5 rounded-xl"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                >
+                  <Gift size={13} style={{ color: `${accent}60`, flexShrink: 0, marginTop: 1 }} />
+                  <p className="text-[10px] leading-relaxed" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.35)' }}>
+                    You'll receive a <span style={{ color: accent }}>30% discount</span> automatically on your birthday & anniversary!
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Save button */}
+            <div className="px-6 pb-8 pt-4 border-t border-white/10 shrink-0">
+              <button
+                onClick={handleSave}
+                className="liquid-glass-accent w-full py-4 rounded-2xl font-semibold text-xs uppercase tracking-widest transition-all hover:scale-[1.01]"
+                style={{
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  background: `linear-gradient(135deg, ${accent}88 0%, ${accent}44 100%)`,
+                  color: '#0B0B0F',
+                  borderColor: `${accent}60`,
+                  boxShadow: `${accentGlow}, inset 0 1px 0 rgba(255,255,255,0.35)`,
+                }}
+              >
+                Save Profile
+              </button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ─── Category flash intro overlay ────────────────────────────────────────── */
 function CategoryStoryIntro() {
   const { activeCategory } = useSessionStore();
   const { accent } = useAccentColor();
