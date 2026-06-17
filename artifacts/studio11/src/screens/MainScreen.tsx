@@ -9,6 +9,7 @@ import { getRecommendations } from '@/data/recommendations';
 import { useAccentColor } from '@/hooks/useAccentColor';
 import { useSwipe } from '@/hooks/useSwipe';
 import logoPath from '@assets/logo_transparent.png';
+import maniPadiVideoUrl from '@assets/grok_video_2026-06-17-14-00-05_1781685081657.mp4';
 
 /* ─── Service name bracket parser ─────────────────────────────────────────── */
 function ServiceNameDisplay({ name }: { name: string }) {
@@ -282,29 +283,66 @@ function SubCategoryTabs() {
   );
 }
 
+/* ─── Per-subcategory / category media map ─────────────────────────────────── */
+type MediaEntry = { type: 'video'; src: string } | { type: 'image'; src: string };
+
+const CATEGORY_MEDIA: Partial<Record<string, MediaEntry>> = {
+  'FEMALE::MANI PADI': { type: 'video', src: maniPadiVideoUrl },
+};
+
+function getCategoryMedia(gender: string, category: string): MediaEntry | null {
+  return CATEGORY_MEDIA[`${gender}::${category}`] ?? null;
+}
+
 /* ─── Cinematic / media area ───────────────────────────────────────────────── */
 function CinematicArea() {
-  const { activeCategory, activeSubCategory } = useSessionStore();
+  const { activeCategory, activeSubCategory, gender } = useSessionStore();
   const { accent } = useAccentColor();
   const gradient = categoryGradients[activeCategory];
   const tagline = categoryTaglines[activeCategory];
+  const media = getCategoryMedia(gender, activeCategory);
 
   return (
     <div className="relative h-[140px] w-full flex-none overflow-hidden border-b border-white/10 flex items-center justify-center shrink-0">
       <AnimatePresence mode="popLayout">
-        <motion.div
-          key={activeCategory}
-          className="absolute inset-0 z-0"
-          style={{ background: gradient }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-        />
+        {media ? (
+          <motion.div
+            key={`${gender}-${activeCategory}-media`}
+            className="absolute inset-0 z-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            {media.type === 'video' ? (
+              <video
+                src={media.src}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <img src={media.src} alt={activeCategory} className="w-full h-full object-cover" />
+            )}
+          </motion.div>
+        ) : (
+          <motion.div
+            key={activeCategory}
+            className="absolute inset-0 z-0"
+            style={{ background: gradient }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+          />
+        )}
       </AnimatePresence>
-      <div className="absolute inset-0 bg-black/45 z-0" />
 
-      {/* Main category title */}
+      <div className="absolute inset-0 bg-black/35 z-0" />
+
+      {/* Category title overlay */}
       <div className="relative z-10 flex flex-col items-center text-center px-4 w-full">
         <h2
           className="text-4xl md:text-5xl text-white/10 uppercase tracking-widest select-none pointer-events-none w-full leading-none"
@@ -320,21 +358,24 @@ function CinematicArea() {
         </p>
       </div>
 
-      {/* Media placeholder badge */}
+      {/* Badge: shows "media" indicator when video/image is active, placeholder when not */}
       <div
         className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full"
         style={{
           background: 'rgba(0,0,0,0.45)',
-          border: '1px dashed rgba(255,255,255,0.18)',
+          border: media ? '1px solid rgba(255,255,255,0.18)' : '1px dashed rgba(255,255,255,0.18)',
           backdropFilter: 'blur(8px)',
         }}
       >
-        <ImageIcon size={10} style={{ color: `${accent}80` }} />
+        <ImageIcon size={10} style={{ color: media ? accent : `${accent}60` }} />
         <span
           className="text-[8px] uppercase tracking-[0.15em]"
-          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.35)' }}
+          style={{
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            color: media ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.28)',
+          }}
         >
-          {activeSubCategory || activeCategory} media
+          {media ? (activeSubCategory || activeCategory) : `${activeSubCategory || activeCategory} media`}
         </span>
       </div>
 
