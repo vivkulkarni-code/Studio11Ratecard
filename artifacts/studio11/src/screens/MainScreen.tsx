@@ -12,25 +12,32 @@ import logoPath from '@assets/logo_transparent.png';
 import maniPadiVideoUrl from '@assets/grok_video_2026-06-17-14-00-05_1781685081657.mp4';
 
 /* ─── Service name bracket parser ─────────────────────────────────────────── */
+function toSentenceCase(str: string): string {
+  const inner = str.replace(/^\(|\)$/g, '').trim();
+  const fixed = inner.charAt(0).toUpperCase() + inner.slice(1).toLowerCase();
+  return `(${fixed})`;
+}
+
 function ServiceNameDisplay({ name }: { name: string }) {
   const match = name.match(/^(.*?)(\s*\(.*\))\s*$/);
-  if (!match) return <span>{name}</span>;
+  if (!match) {
+    return <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 300 }}>{name}</span>;
+  }
   return (
     <>
-      <span>{match[1].trim()}</span>
+      <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 300 }}>{match[1].trim()}</span>
       <span
         style={{
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
+          fontFamily: "'Montserrat', sans-serif",
           fontSize: '0.68em',
-          fontWeight: 400,
+          fontWeight: 300,
           opacity: 0.52,
-          textTransform: 'lowercase',
           letterSpacing: '0.03em',
           display: 'block',
           marginTop: '2px',
         }}
       >
-        {match[2].trim().toLowerCase()}
+        {toSentenceCase(match[2].trim())}
       </span>
     </>
   );
@@ -676,7 +683,7 @@ function ServiceDrawer() {
                   <p className="text-[10px] uppercase tracking-[0.2em] mb-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: `${accent}80` }}>
                     {selectedService.subCategory}
                   </p>
-                  <h2 className="text-2xl text-white" style={{ fontFamily: "'Bodoni Moda', serif" }}>{selectedService.name}</h2>
+                  <h2 className="text-2xl text-white" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 300 }}>{selectedService.name}</h2>
                 </div>
                 <button onClick={() => setDrawerOpen(false)} className="text-white/30 hover:text-white/60 mt-1">
                   <X size={20} />
@@ -686,13 +693,13 @@ function ServiceDrawer() {
               <div className="flex items-center gap-4 mb-5">
                 <span
                   className="border text-xs px-3 py-1 rounded-full uppercase tracking-widest"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)' }}
+                  style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 300, borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)' }}
                 >
                   {selectedService.duration} MIN
                 </span>
                 <span
-                  className="text-2xl font-semibold"
-                  style={{ fontFamily: "'Bodoni Moda', serif", color: accent }}
+                  className="text-2xl"
+                  style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 300, color: accent }}
                 >
                   {displayPrice}
                 </span>
