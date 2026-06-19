@@ -24,16 +24,24 @@ export interface UserProfile {
   focus: Focus;
 }
 
+export interface ServiceVariant {
+  label: string;
+  price: number;
+  duration: number;
+}
+
 export interface Service {
   id: string;
   name: string;
   price: number;
   duration: number;
   description: string;
+  fullDescription?: string;
   benefits: string[];
   category: CategoryName;
   subCategory: string;
   gender: Gender;
+  variants?: ServiceVariant[];
 }
 
 export interface SessionItem {

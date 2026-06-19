@@ -23,7 +23,7 @@ export default function PersonalFocusScreen() {
     setAppScreen('main');
   };
 
-  const focusOptions: Focus[] = ['MALE', 'FEMALE', 'KIDS'];
+  const focusOptions: Focus[] = ['MALE', 'FEMALE'];
 
   return (
     <div className="w-full h-[100dvh] bg-[#0B0B0F] flex flex-col items-center justify-end relative overflow-hidden">

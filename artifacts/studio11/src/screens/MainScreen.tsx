@@ -167,14 +167,11 @@ function Header() {
 }
 
 /* ─── Sparkle particles ────────────────────────────────────────────────────── */
-function Sparkle({ color, count = 6 }: { color: string; count?: number }) {
+function Sparkle({ color, count = 3 }: { color: string; count?: number }) {
   const POSITIONS = [
-    { left: '15%', top: '20%', dx: '-8px', dy: '-12px', delay: 0 },
-    { left: '80%', top: '15%', dx: '8px', dy: '-14px', delay: 0.3 },
-    { left: '50%', top: '80%', dx: '0px', dy: '12px', delay: 0.6 },
-    { left: '90%', top: '60%', dx: '10px', dy: '-8px', delay: 0.1 },
-    { left: '10%', top: '70%', dx: '-10px', dy: '8px', delay: 0.5 },
-    { left: '40%', top: '10%', dx: '4px', dy: '-16px', delay: 0.9 },
+    { left: '18%', top: '25%', dx: '-6px', dy: '-10px', delay: 0 },
+    { left: '75%', top: '18%', dx: '6px', dy: '-12px', delay: 0.5 },
+    { left: '45%', top: '70%', dx: '0px', dy: '10px', delay: 1.1 },
   ].slice(0, count);
 
   return (
@@ -186,13 +183,13 @@ function Sparkle({ color, count = 6 }: { color: string; count?: number }) {
             position: 'absolute',
             left: p.left,
             top: p.top,
-            width: '4px',
-            height: '4px',
+            width: '3px',
+            height: '3px',
             borderRadius: '50%',
             background: color,
-            boxShadow: `0 0 4px ${color}, 0 0 8px ${color}`,
+            boxShadow: `0 0 3px ${color}, 0 0 6px ${color}`,
             pointerEvents: 'none',
-            animation: `glitter-drift 2.2s ease-out ${p.delay}s infinite`,
+            animation: `glitter-drift 3.5s ease-out ${p.delay}s infinite`,
             ['--dx' as any]: p.dx,
             ['--dy' as any]: p.dy,
           }}
@@ -500,7 +497,7 @@ function ServiceList() {
                   className="text-[9px] mt-1 uppercase tracking-[0.14em]"
                   style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: `${accent}60` }}
                 >
-                  {isInSession ? 'In session' : 'Tap to explore'}
+                  {isInSession ? 'In session' : service.variants ? 'Multiple options' : 'Tap to explore'}
                 </p>
               </div>
 
@@ -638,18 +635,31 @@ function ServiceDrawer() {
   const { drawerOpen, setDrawerOpen, selectedService, addToSession, sessionItems } = useSessionStore();
   const { accent, accentGlow } = useAccentColor();
   const [adding, setAdding] = useState(false);
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
+  const [showMore, setShowMore] = useState(false);
+
+  const hasVariants = !!(selectedService?.variants && selectedService.variants.length > 0);
+  const activeVariant = hasVariants ? selectedService!.variants![selectedVariantIdx] : null;
+
+  const displayPrice = activeVariant
+    ? (activeVariant.price === 0 ? 'Consult Us' : `₹${activeVariant.price.toLocaleString('en-IN')}`)
+    : selectedService?.price === 0 ? 'Consult Us' : selectedService ? `₹${selectedService.price.toLocaleString('en-IN')}` : '';
+
+  const displayDuration = activeVariant ? activeVariant.duration : selectedService?.duration ?? 0;
 
   const handleAdd = () => {
     if (!selectedService) return;
     setAdding(true);
     setTimeout(() => {
-      addToSession(selectedService);
+      const serviceToAdd = hasVariants && activeVariant
+        ? { ...selectedService, price: activeVariant.price, duration: activeVariant.duration, name: `${selectedService.name} — ${activeVariant.label}` }
+        : selectedService;
+      addToSession(serviceToAdd);
       setAdding(false);
     }, 800);
   };
 
-  const alreadyAdded = selectedService ? sessionItems.some(i => i.service.id === selectedService.id) : false;
-  const displayPrice = selectedService?.price === 0 ? 'Consult Us' : selectedService ? `₹${selectedService.price.toLocaleString('en-IN')}` : '';
+  const alreadyAdded = selectedService ? sessionItems.some(i => i.service.id === selectedService.id || i.service.name.startsWith(selectedService.name + ' —')) : false;
 
   return (
     <AnimatePresence>
@@ -663,15 +673,17 @@ function ServiceDrawer() {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
           />
           <motion.div
+            key={selectedService.id}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             drag="y"
             dragConstraints={{ top: 0 }}
-            onDragEnd={(e, { offset, velocity }) => {
+            onDragEnd={(_, { offset, velocity }) => {
               if (offset.y > 100 || velocity.y > 500) setDrawerOpen(false);
             }}
+            onAnimationStart={() => { setSelectedVariantIdx(0); setShowMore(false); }}
             className="fixed bottom-0 left-0 right-0 bg-[#0A0A0C]/97 backdrop-blur-2xl border-t border-white/15 rounded-t-3xl z-50 flex flex-col max-h-[85vh]"
             style={{ borderTopColor: `${accent}20` }}
           >
@@ -680,6 +692,7 @@ function ServiceDrawer() {
             </div>
 
             <div className="px-6 pb-8 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.2em] mb-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: `${accent}80` }}>
@@ -692,12 +705,43 @@ function ServiceDrawer() {
                 </button>
               </div>
 
+              {/* Variants — shown before price if service has them */}
+              {hasVariants && (
+                <div className="mb-5">
+                  <p className="text-[9px] uppercase tracking-[0.2em] mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.3)' }}>
+                    Choose option
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedService.variants!.map((v, idx) => {
+                      const isActive = idx === selectedVariantIdx;
+                      return (
+                        <button
+                          key={v.label}
+                          onClick={() => setSelectedVariantIdx(idx)}
+                          className="px-4 py-2 rounded-xl text-xs uppercase tracking-widest border transition-all duration-200"
+                          style={{
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontWeight: 300,
+                            background: isActive ? `linear-gradient(135deg, ${accent}30 0%, ${accent}10 100%)` : 'rgba(255,255,255,0.04)',
+                            borderColor: isActive ? `${accent}60` : 'rgba(255,255,255,0.12)',
+                            color: isActive ? accent : 'rgba(255,255,255,0.5)',
+                          }}
+                        >
+                          {v.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Duration + Price */}
               <div className="flex items-center gap-4 mb-5">
                 <span
                   className="border text-xs px-3 py-1 rounded-full uppercase tracking-widest"
                   style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 300, borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)' }}
                 >
-                  {selectedService.duration} MIN
+                  {displayDuration} MIN
                 </span>
                 <span
                   className="text-2xl"
@@ -707,10 +751,38 @@ function ServiceDrawer() {
                 </span>
               </div>
 
-              <p className="text-sm leading-relaxed mb-5" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.55)' }}>
-                {selectedService.description}
-              </p>
+              {/* Description + More toggle */}
+              <div className="mb-5">
+                <p className="text-sm leading-relaxed" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.55)' }}>
+                  {selectedService.description}
+                </p>
+                {selectedService.fullDescription && (
+                  <>
+                    <AnimatePresence>
+                      {showMore && (
+                        <motion.p
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="text-sm leading-relaxed mt-3 overflow-hidden"
+                          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.42)' }}
+                        >
+                          {selectedService.fullDescription}
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
+                    <button
+                      onClick={() => setShowMore(v => !v)}
+                      className="mt-2 text-[10px] uppercase tracking-[0.18em] border-b border-dashed pb-[1px] transition-colors duration-150"
+                      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: `${accent}90`, borderColor: `${accent}40` }}
+                    >
+                      {showMore ? 'Less' : 'More'}
+                    </button>
+                  </>
+                )}
+              </div>
 
+              {/* Includes */}
               <h4 className="text-xs uppercase tracking-widest mb-3" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.35)' }}>
                 Includes:
               </h4>
