@@ -698,7 +698,9 @@ function ServiceDrawer() {
                   <p className="text-[10px] uppercase tracking-[0.2em] mb-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: `${accent}80` }}>
                     {selectedService.subCategory}
                   </p>
-                  <h2 className="text-2xl text-white" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 300 }}>{selectedService.name}</h2>
+                  <h2 className="text-2xl text-white leading-tight" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 300 }}>
+                    <ServiceNameDisplay name={selectedService.name} />
+                  </h2>
                 </div>
                 <button onClick={() => setDrawerOpen(false)} className="text-white/30 hover:text-white/60 mt-1">
                   <X size={20} />
@@ -883,7 +885,9 @@ function DecisionModal() {
               <h3 className="text-[10px] uppercase tracking-widest mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'rgba(255,255,255,0.5)' }}>
                 Added to Session
               </h3>
-              <h2 className="text-xl text-white" style={{ fontFamily: "'Bodoni Moda', serif" }}>{lastAddedService.name}</h2>
+              <h2 className="text-xl text-white leading-tight" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 300 }}>
+                <ServiceNameDisplay name={lastAddedService.name} />
+              </h2>
             </div>
 
             {recommendedServices.length > 0 && (
@@ -902,7 +906,7 @@ function DecisionModal() {
                       style={{ borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}
                     >
                       <div className="flex flex-col flex-1 min-w-0 pr-2">
-                        <span className="text-sm text-white/70 truncate" style={{ fontFamily: "'Bodoni Moda', serif" }}>{rec.name}</span>
+                        <span className="text-sm text-white/70 truncate" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 300 }}>{rec.name}</span>
                         <span className="text-[10px]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: `${accent}90` }}>
                           ₹{rec.price.toLocaleString('en-IN')}
                         </span>
@@ -1007,7 +1011,9 @@ function SessionDrawer() {
                     style={{ borderColor: 'rgba(255,255,255,0.06)' }}
                   >
                     <div className="flex flex-col pr-4">
-                      <span className="text-base text-white leading-snug mb-1" style={{ fontFamily: "'Bodoni Moda', serif" }}>{item.service.name}</span>
+                      <span className="text-base text-white leading-snug mb-1" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 300 }}>
+                        <ServiceNameDisplay name={item.service.name} />
+                      </span>
                       <span className="text-sm font-medium tracking-wide" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: accent }}>
                         {item.service.price === 0 ? 'Consult Us' : `₹${item.service.price.toLocaleString('en-IN')}`}
                       </span>
