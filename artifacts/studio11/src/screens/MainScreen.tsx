@@ -11,6 +11,9 @@ import { useSwipe } from '@/hooks/useSwipe';
 import logoPath from '@assets/logo_transparent.png';
 import maniPadiVideoUrl from '@assets/grok_video_2026-06-17-14-00-05_1781685081657.mp4';
 import bridalVideoUrl from '@assets/grok_video_2026-06-17-17-44-23_1781699536476.mp4';
+import femaleCutsVideoUrl from '@assets/cuts_1781949331237.mp4';
+import femaleStylingVideoUrl from '@assets/hair_Styling_1781949362487.mp4';
+import femaleColorsVideoUrl from '@assets/colors_1781949381451.mp4';
 
 /* ─── Service name bracket parser ─────────────────────────────────────────── */
 function toSentenceCase(str: string): string {
@@ -292,11 +295,20 @@ function SubCategoryTabs() {
 type MediaEntry = { type: 'video'; src: string } | { type: 'image'; src: string };
 
 const CATEGORY_MEDIA: Partial<Record<string, MediaEntry>> = {
+  // Female — category level
   'FEMALE::MANI PADI': { type: 'video', src: maniPadiVideoUrl },
   'FEMALE::BRIDAL':    { type: 'video', src: bridalVideoUrl },
+  // Female — sub-category level (HAIR STYLING)
+  'FEMALE::HAIR STYLING::Cuts':    { type: 'video', src: femaleCutsVideoUrl },
+  'FEMALE::HAIR STYLING::Styling': { type: 'video', src: femaleStylingVideoUrl },
+  'FEMALE::HAIR STYLING::Colors':  { type: 'video', src: femaleColorsVideoUrl },
 };
 
-function getCategoryMedia(gender: string, category: string): MediaEntry | null {
+function getCategoryMedia(gender: string, category: string, subCategory?: string): MediaEntry | null {
+  if (subCategory) {
+    const subKey = `${gender}::${category}::${subCategory}`;
+    if (CATEGORY_MEDIA[subKey]) return CATEGORY_MEDIA[subKey]!;
+  }
   return CATEGORY_MEDIA[`${gender}::${category}`] ?? null;
 }
 
@@ -306,14 +318,14 @@ function CinematicArea() {
   const { accent } = useAccentColor();
   const gradient = categoryGradients[activeCategory];
   const tagline = categoryTaglines[activeCategory];
-  const media = getCategoryMedia(gender, activeCategory);
+  const media = getCategoryMedia(gender, activeCategory, activeSubCategory);
 
   return (
     <div className="relative h-[140px] w-full flex-none overflow-hidden border-b border-white/10 flex items-center justify-center shrink-0">
       <AnimatePresence mode="popLayout">
         {media ? (
           <motion.div
-            key={`${gender}-${activeCategory}-media`}
+            key={`${gender}-${activeCategory}-${activeSubCategory}-media`}
             className="absolute inset-0 z-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
