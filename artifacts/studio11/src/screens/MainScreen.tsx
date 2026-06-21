@@ -19,7 +19,7 @@ import textureVideoUrl from '@assets/Texure_1782058341128.mp4';
 import detanVideoUrl from '@assets/De-tan_1782058353670.mp4';
 import cleanUpVideoUrl from '@assets/Clean_Up_1782058365550.mp4';
 import maskVideoUrl from '@assets/Mask_1782058380380.mp4';
-import bodyTreatmentsVideoUrl from '@assets/Body_Treatments_1782058396305.mp4';
+import bodyTreatmentsVideoUrl from '@assets/InShot_20260621_224522079_1782062291405.mp4';
 import hairSpaVideoUrl from '@assets/hair_spa_1782058434828.mp4';
 
 /* ─── Service name bracket parser ─────────────────────────────────────────── */
