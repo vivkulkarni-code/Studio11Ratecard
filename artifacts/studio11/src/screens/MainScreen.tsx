@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Trash2, X, Plus, Scissors, Camera, ShoppingBag, Star, User, ScanFace, ShoppingCart, Gift, Calendar, ImageIcon, Images } from 'lucide-react';
+import { Check, Trash2, X, Plus, Scissors, Camera, ShoppingBag, Star, User, ScanFace, ShoppingCart, Gift, Calendar, ImageIcon } from 'lucide-react';
 import { useSessionStore, BottomTab, UserProfile } from '@/store/sessionStore';
 import { getServicesByGenderCategoryAndSubCategory, getServicesByGenderAndCategory } from '@/data/services';
 import { categoryTaglines, categoryGradients, MALE_CATEGORIES, FEMALE_CATEGORIES } from '@/data/categories';
@@ -110,7 +110,7 @@ export default function MainScreen() {
 
 /* ─── Header ───────────────────────────────────────────────────────────────── */
 function Header() {
-  const { gender, setGender, itemCount, totalPrice, setSessionDrawerOpen, setProfileDrawerOpen, setAppScreen } = useSessionStore();
+  const { gender, setGender, itemCount, totalPrice, setSessionDrawerOpen, setProfileDrawerOpen } = useSessionStore();
   const { accent, accentGlow } = useAccentColor();
   const count = itemCount();
 
@@ -152,19 +152,8 @@ function Header() {
         ))}
       </div>
 
-      {/* Right icons: our work + profile + cart */}
+      {/* Right icons: profile + cart */}
       <div className="flex items-center gap-2 shrink-0">
-        {/* Our Work icon */}
-        <button
-          data-testid="button-gallery"
-          onClick={() => setAppScreen('gallery')}
-          className="relative w-9 h-9 rounded-full border flex items-center justify-center transition-all glass-l2"
-          style={{ borderColor: 'rgba(255,255,255,0.18)' }}
-          title="Our Work"
-        >
-          <Images size={16} style={{ color: 'rgba(255,255,255,0.7)' }} />
-        </button>
-
         {/* Profile icon */}
         <button
           data-testid="button-profile"
@@ -577,7 +566,7 @@ function ServiceList() {
 
 /* ─── Bottom nav — liquid glass tabs ──────────────────────────────────────── */
 function BottomNav() {
-  const { activeBottomTab, setActiveBottomTab } = useSessionStore();
+  const { activeBottomTab, setActiveBottomTab, setAppScreen } = useSessionStore();
   const { accent } = useAccentColor();
 
   const tabs: { key: BottomTab; label: string; icon: React.ReactNode }[] = [
@@ -596,7 +585,7 @@ function BottomNav() {
           <button
             key={tab.key}
             data-testid={`bottom-tab-${tab.key}`}
-            onClick={() => setActiveBottomTab(tab.key)}
+            onClick={() => tab.key === 'ourwork' ? setAppScreen('gallery') : setActiveBottomTab(tab.key)}
             className="flex flex-col items-center gap-0.5 py-1.5 px-2.5 rounded-2xl transition-all duration-200 relative overflow-hidden flex-1 glass-l2"
             style={{
               background: isActive
