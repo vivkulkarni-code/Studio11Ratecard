@@ -1009,7 +1009,7 @@ function SessionDrawer() {
     const total = totalPrice();
     const serviceList = sessionItems.map(i => `• ${i.service.name} — ₹${i.service.price.toLocaleString('en-IN')}`).join('\n');
     const msg = `Hello Studio11,\n\nI would like to book the following services:\n\n${serviceList}\n\nTotal: ₹${total.toLocaleString('en-IN')}\nPreferred Date: \nPreferred Time: \n\nPlease confirm availability.`;
-    window.open(`https://wa.me/919999999999?text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(`https://wa.me/919823157961?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   return (
