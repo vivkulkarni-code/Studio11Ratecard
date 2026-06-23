@@ -31,6 +31,13 @@ import maleGroomalImgUrl from '@assets/Groomal_1782099710464.png';
 import maleFacialsImgUrl from '@assets/Facials_1782099710482.png';
 import maleColorsImgUrl from '@assets/Colors_1782099710505.png';
 import maleBodyTreatmentsImgUrl from '@assets/Body_treatments_1782099710530.png';
+import maleCutsVideoUrl from '@assets/Male_Cuts_1782244651470.mp4';
+import maleHairSpaVideoUrl from '@assets/male_Hair_treatments_&_Spas_1782244651509.mp4';
+import maleFacialsVideoUrl from '@assets/Male_Facials_1782244651523.mp4';
+import maleColorsVideoUrl from '@assets/Male_colors_1782244651541.mp4';
+import maleSkinCareVideoUrl from '@assets/Male_Skin_care_1782244651567.mp4';
+import femaleMakeupVideoUrl from '@assets/Female_makeup_1782244651585.mp4';
+import maleMaskImgUrl from '@assets/Male_Mask_(1)_1782244651610.png';
 
 /* ─── Service name bracket parser ─────────────────────────────────────────── */
 function toSentenceCase(str: string): string {
@@ -316,16 +323,20 @@ const CATEGORY_MEDIA: Partial<Record<string, MediaEntry>> = {
   'FEMALE::BRIDAL':    { type: 'video', src: bridalVideoUrl },
   'FEMALE::FACIALS':   { type: 'video', src: facialsVideoUrl },
   // Male — category level
-  'MALE::SPAS & MASSAGE':    { type: 'video', src: maleBodySpaVideoUrl },
-  'MALE::HAIR STYLING':      { type: 'image', src: maleHairStylingImgUrl },
-  'MALE::GROOMAL':           { type: 'image', src: maleGroomalImgUrl },
-  'MALE::SKIN CARE':         { type: 'image', src: maleSkinCareImgUrl },
-  'MALE::FACIALS':           { type: 'image', src: maleFacialsImgUrl },
-  'MALE::MANI PADI':         { type: 'image', src: maleManiPadiImgUrl },
-  'MALE::MAKEUP':            { type: 'image', src: maleMakeupImgUrl },
-  'MALE::BODY TREATMENTS':   { type: 'image', src: maleBodyTreatmentsImgUrl },
+  'MALE::SPAS & MASSAGE':          { type: 'video', src: maleBodySpaVideoUrl },
+  'MALE::HAIR STYLING':            { type: 'video', src: maleCutsVideoUrl },
+  'MALE::HAIR TREATMENTS & SPAS':  { type: 'video', src: maleHairSpaVideoUrl },
+  'MALE::FACIALS':                 { type: 'video', src: maleFacialsVideoUrl },
+  'MALE::SKIN CARE':               { type: 'video', src: maleSkinCareVideoUrl },
+  'MALE::GROOMAL':                 { type: 'image', src: maleGroomalImgUrl },
+  'MALE::MANI PADI':               { type: 'image', src: maleManiPadiImgUrl },
+  'MALE::MAKEUP':                  { type: 'image', src: maleMakeupImgUrl },
+  'MALE::BODY TREATMENTS':         { type: 'image', src: maleBodyTreatmentsImgUrl },
   // Male — sub-category level (HAIR STYLING)
-  'MALE::HAIR STYLING::Colors': { type: 'image', src: maleColorsImgUrl },
+  'MALE::HAIR STYLING::Cuts':   { type: 'video', src: maleCutsVideoUrl },
+  'MALE::HAIR STYLING::Colors': { type: 'video', src: maleColorsVideoUrl },
+  // Male — SKIN CARE sub-category
+  'MALE::SKIN CARE::Mask':      { type: 'image', src: maleMaskImgUrl },
   // Female — sub-category level (HAIR STYLING)
   'FEMALE::HAIR STYLING::Cuts':    { type: 'video', src: femaleCutsVideoUrl },
   'FEMALE::HAIR STYLING::Styling': { type: 'video', src: femaleStylingVideoUrl },
@@ -340,6 +351,8 @@ const CATEGORY_MEDIA: Partial<Record<string, MediaEntry>> = {
   'FEMALE::SKIN CARE::Mask':    { type: 'video', src: maskVideoUrl },
   // Female — BODY TREATMENTS category
   'FEMALE::BODY TREATMENTS': { type: 'video', src: bodyTreatmentsVideoUrl },
+  // Female — MAKEUP category
+  'FEMALE::MAKEUP': { type: 'video', src: femaleMakeupVideoUrl },
 };
 
 function getCategoryMedia(gender: string, category: string, subCategory?: string): MediaEntry | null {
