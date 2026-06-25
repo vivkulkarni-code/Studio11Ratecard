@@ -31,6 +31,8 @@ import maleGroomalImgUrl from '@assets/Groomal_1782099710464.png';
 import maleFacialsImgUrl from '@assets/Facials_1782099710482.png';
 import maleColorsImgUrl from '@assets/Colors_1782099710505.png';
 import maleBodyTreatmentsImgUrl from '@assets/Body_treatments_1782099710530.png';
+import maleGroomalVideoUrl from '@assets/Male_Groomal_1782374586829.mp4';
+import maleMakeupVideoUrl from '@assets/Male_Makeup_1782374586852.mp4';
 import maleCutsVideoUrl from '@assets/Male_Cuts_1782364361295.mp4';
 import maleHairSpaVideoUrl from '@assets/male_Hair_treatments_&_Spas2_1782364361261.mp4';
 import maleBodyTreatmentsVideoUrl from '@assets/Male_Body_treatments_1782364361317.mp4';
@@ -330,9 +332,9 @@ const CATEGORY_MEDIA: Partial<Record<string, MediaEntry>> = {
   'MALE::HAIR TREATMENTS & SPAS':  { type: 'video', src: maleHairSpaVideoUrl },
   'MALE::FACIALS':                 { type: 'video', src: maleFacialsVideoUrl },
   'MALE::SKIN CARE':               { type: 'video', src: maleSkinCareVideoUrl },
-  'MALE::GROOMAL':                 { type: 'image', src: maleGroomalImgUrl },
+  'MALE::GROOMAL':                 { type: 'video', src: maleGroomalVideoUrl },
   'MALE::MANI PADI':               { type: 'image', src: maleManiPadiImgUrl },
-  'MALE::MAKEUP':                  { type: 'image', src: maleMakeupImgUrl },
+  'MALE::MAKEUP':                  { type: 'video', src: maleMakeupVideoUrl },
   'MALE::BODY TREATMENTS':         { type: 'video', src: maleBodyTreatmentsVideoUrl },
   // Male — sub-category level (HAIR STYLING)
   'MALE::HAIR STYLING::Cuts':   { type: 'video', src: maleCutsVideoUrl },
