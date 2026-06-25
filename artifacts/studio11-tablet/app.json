@@ -3,7 +3,7 @@
     "name": "Studio11 Tablet App",
     "slug": "studio11-tablet",
     "version": "1.0.0",
-    "orientation": "landscape",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "studio11-tablet",
     "userInterfaceStyle": "dark",

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -11,21 +11,17 @@ import {
   View,
   Modal,
 } from 'react-native';
-import { Paths, Directory } from 'expo-file-system';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSessionStore } from '../store/sessionStore';
 import { logoAsset } from '../mediaAssets';
 import colors from '../../constants/colors';
 import { useAccentColor } from '../hooks/useAccentColor';
+import { getStudio11Dir, requestStoragePermission, ensureStudio11Dir } from '../utils/storage';
 
 const { width, height } = Dimensions.get('window');
 const COLS = 4;
 const THUMB_SIZE = (width - 40 - 12 * (COLS - 1)) / COLS;
-
-function getProductsDir() {
-  return new Directory(Paths.document, 'Studio11', 'Products');
-}
 
 interface Product {
   id: string;
@@ -38,21 +34,24 @@ export default function ProductsScreen() {
   const accent = useAccentColor();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [permissionDenied, setPermissionDenied] = useState(false);
   const [lightbox, setLightbox] = useState<Product | null>(null);
 
   useEffect(() => {
     loadProducts();
   }, []);
 
-  const loadProducts = () => {
+  const loadProducts = async () => {
+    setLoading(true);
+    const granted = await requestStoragePermission();
+    if (!granted) {
+      setPermissionDenied(true);
+      setLoading(false);
+      return;
+    }
+    setPermissionDenied(false);
     try {
-      setLoading(true);
-      const dir = getProductsDir();
-      if (!dir.exists) {
-        dir.create();
-        setProducts([]);
-        return;
-      }
+      const dir = await ensureStudio11Dir('Products');
       const files = dir.list();
       const imgs = files
         .filter(f => /\.(jpg|jpeg|png|webp)$/i.test(f.uri.split('/').pop() ?? ''))
@@ -65,7 +64,7 @@ export default function ProductsScreen() {
           };
         });
       setProducts(imgs);
-    } catch (e) {
+    } catch {
       setProducts([]);
     } finally {
       setLoading(false);
@@ -87,7 +86,22 @@ export default function ProductsScreen() {
       <Text style={styles.title}>Products</Text>
       <Text style={styles.sub}>Explore our curated product collection</Text>
 
-      {loading ? (
+      {permissionDenied ? (
+        <View style={styles.centered}>
+          <Text style={styles.emptyIcon}>🔒</Text>
+          <Text style={styles.emptyTitle}>Storage Permission Required</Text>
+          <Text style={styles.emptyDesc}>
+            This app needs access to your tablet's storage to display products.
+          </Text>
+          <TouchableOpacity
+            onPress={loadProducts}
+            style={[styles.reloadBtn, { borderColor: accent }]}
+            activeOpacity={0.75}
+          >
+            <Text style={[styles.reloadText, { color: accent }]}>Grant Permission</Text>
+          </TouchableOpacity>
+        </View>
+      ) : loading ? (
         <View style={styles.centered}>
           <ActivityIndicator color={accent} size="large" />
           <Text style={styles.loadingText}>Loading products…</Text>

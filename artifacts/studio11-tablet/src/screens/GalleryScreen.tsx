@@ -11,13 +11,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Paths, Directory } from 'expo-file-system';
 import { BlurView } from 'expo-blur';
 import { useSessionStore } from '../store/sessionStore';
 import { bundledGalleryPhotos, galleryCategories } from '../data/galleryPhotos';
 import { logoAsset } from '../mediaAssets';
 import colors from '../../constants/colors';
 import { useAccentColor } from '../hooks/useAccentColor';
+import { getStudio11Dir, requestStoragePermission } from '../utils/storage';
 
 const { width, height } = Dimensions.get('window');
 const COLS = 3;
@@ -34,15 +34,22 @@ export default function GalleryScreen() {
   const accent = useAccentColor();
   const [activeCategory, setActiveCategory] = useState('All');
   const [devicePhotos, setDevicePhotos] = useState<DevicePhoto[]>([]);
+  const [permissionDenied, setPermissionDenied] = useState(false);
   const [lightboxUri, setLightboxUri] = useState<string | null>(null);
 
   useEffect(() => {
     loadDevicePhotos();
   }, []);
 
-  const loadDevicePhotos = () => {
+  const loadDevicePhotos = async () => {
+    const granted = await requestStoragePermission();
+    if (!granted) {
+      setPermissionDenied(true);
+      return;
+    }
+    setPermissionDenied(false);
     try {
-      const dir = new Directory(Paths.document, 'Studio11', 'OurWork');
+      const dir = getStudio11Dir('OurWork');
       if (!dir.exists) return;
       const files = dir.list();
       const imgs = files
@@ -54,9 +61,25 @@ export default function GalleryScreen() {
     }
   };
 
+  // Device filesystem photos first, then bundled gallery photos
   const allPhotos = [
-    ...bundledGalleryPhotos.map(p => ({ id: p.id, source: p.source, category: p.category, uri: undefined as string | undefined })),
-    ...devicePhotos.map(p => ({ id: p.id, source: undefined as ReturnType<typeof require> | undefined, category: p.category, uri: p.uri })),
+    ...devicePhotos.map(p => ({
+      id: p.id,
+      source: undefined as number | undefined,
+      category: p.category,
+      uri: p.uri as string | undefined,
+    })),
+    ...bundledGalleryPhotos.map(p => ({
+      id: p.id,
+      source: p.source as number | undefined,
+      category: p.category,
+      uri: undefined as string | undefined,
+    })),
+  ];
+
+  const categories = [
+    ...galleryCategories,
+    ...(devicePhotos.length ? ['Our Work'] : []),
   ];
 
   const filtered = activeCategory === 'All'
@@ -70,15 +93,28 @@ export default function GalleryScreen() {
           <Text style={[styles.backText, { color: accent }]}>← Back</Text>
         </TouchableOpacity>
         <Image source={logoAsset} style={styles.logo} resizeMode="contain" />
-        <View style={styles.headerSpacer} />
+        <TouchableOpacity onPress={loadDevicePhotos} style={styles.refreshBtn} activeOpacity={0.7}>
+          <Text style={[styles.refreshText, { color: accent }]}>↺ Refresh</Text>
+        </TouchableOpacity>
       </View>
 
       <Text style={styles.title}>Our Work</Text>
       <Text style={styles.sub}>A curated collection of our finest transformations</Text>
 
+      {permissionDenied && (
+        <View style={styles.permissionBanner}>
+          <Text style={styles.permissionText}>
+            Storage permission is needed to load photos from the tablet's Documents folder.
+          </Text>
+          <TouchableOpacity onPress={loadDevicePhotos} style={[styles.permissionBtn, { borderColor: accent }]}>
+            <Text style={[styles.permissionBtnText, { color: accent }]}>Grant Permission</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View style={styles.filterRow}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 8, flexDirection: 'row' }}>
-          {[...galleryCategories, ...(devicePhotos.length ? ['Our Work'] : [])].map(cat => (
+          {['All', ...categories].map(cat => (
             <TouchableOpacity
               key={cat}
               onPress={() => setActiveCategory(cat)}
@@ -149,10 +185,11 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 50 : 20,
     paddingBottom: 8,
   },
-  backBtn: { padding: 8 },
+  backBtn: { padding: 8, minWidth: 60 },
   backText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 15 },
   logo: { width: 90, height: 44 },
-  headerSpacer: { width: 60 },
+  refreshBtn: { padding: 8, minWidth: 60, alignItems: 'flex-end' },
+  refreshText: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14 },
   title: {
     fontFamily: 'BodoniModa_400Regular',
     fontSize: 34,
@@ -166,7 +203,33 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.muted,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
+  },
+  permissionBanner: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: colors.card,
+    alignItems: 'center',
+    gap: 8,
+  },
+  permissionText: {
+    fontFamily: 'PlusJakartaSans_400Regular',
+    fontSize: 13,
+    color: colors.muted,
+    textAlign: 'center',
+  },
+  permissionBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderRadius: 20,
+  },
+  permissionBtnText: {
+    fontFamily: 'PlusJakartaSans_400Regular',
+    fontSize: 12,
+    letterSpacing: 0.5,
   },
   filterRow: { marginBottom: 12 },
   filterChip: {

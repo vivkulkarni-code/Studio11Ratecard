@@ -16,7 +16,8 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Paths, Directory, File as FSFile } from 'expo-file-system';
+import { File as FSFile } from 'expo-file-system';
+import { getStudio11Dir, requestStoragePermission } from '../utils/storage';
 import * as Haptics from 'expo-haptics';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import type { VideoPlayer } from 'expo-video';
@@ -34,7 +35,7 @@ import { useAccentColor, useAccentDim } from '../hooks/useAccentColor';
 
 const { width, height } = Dimensions.get('window');
 function getBookingsDir() {
-  return new Directory(Paths.document, 'Studio11', 'Bookings');
+  return getStudio11Dir('Bookings');
 }
 
 export default function MainScreen() {
@@ -817,6 +818,7 @@ function SessionDrawer({ accent, accentDim, cart, profile, totalPrice, totalDura
   const saveBooking = async () => {
     setSaving(true);
     try {
+      await requestStoragePermission();
       const bookingsDir = getBookingsDir();
       if (!bookingsDir.exists) {
         bookingsDir.create();
