@@ -29,7 +29,7 @@ import {
   getSubCategories,
 } from '../data/services';
 import { getCategoriesForGender } from '../data/categories';
-import { logoAsset, getVideoForCategory } from '../mediaAssets';
+import { logoAsset, getVideoForCategory, categoryImages } from '../mediaAssets';
 import colors from '../../constants/colors';
 import { useAccentColor, useAccentDim } from '../hooks/useAccentColor';
 
@@ -278,7 +278,6 @@ function CategoryBar({ categories, activeCategory, onSelect, accent }: {
               style={[catStyles.btn, isActive && { borderBottomColor: accent, borderBottomWidth: 2 }]}
               activeOpacity={0.75}
             >
-              <Text style={catStyles.icon}>{cat.icon}</Text>
               <Text style={[catStyles.label, isActive && { color: accent }]}>{cat.shortName}</Text>
             </TouchableOpacity>
           );
@@ -290,20 +289,19 @@ function CategoryBar({ categories, activeCategory, onSelect, accent }: {
 
 const catStyles = StyleSheet.create({
   root: { borderBottomWidth: 1, borderBottomColor: colors.border },
-  scroll: { paddingHorizontal: 8, paddingVertical: 6, flexDirection: 'row', gap: 4 },
+  scroll: { paddingHorizontal: 8, paddingVertical: 4, flexDirection: 'row', gap: 4 },
   btn: {
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 10,
     alignItems: 'center',
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
   },
-  icon: { fontSize: 16, marginBottom: 2 },
   label: {
     fontFamily: 'PlusJakartaSans_400Regular',
-    fontSize: 11,
+    fontSize: 12,
     color: colors.muted,
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
 });
 
@@ -360,15 +358,18 @@ function CinematicArea({ videoSource, category, subCategory, accent }: {
   accent: string;
 }) {
   const key = `${category}_${subCategory}`;
+  const fallbackImage = categoryImages[category];
 
-  if (!videoSource) {
+  if (!videoSource || Platform.OS === 'web') {
     return (
       <View style={cinStyles.root}>
+        {fallbackImage ? (
+          <Image source={fallbackImage} style={StyleSheet.absoluteFill as any} resizeMode="cover" />
+        ) : null}
         <LinearGradient
-          colors={[accent + '22', colors.background]}
-          style={StyleSheet.absoluteFill}
+          colors={['transparent', 'rgba(0,0,0,0.55)', colors.background]}
+          style={cinStyles.vignette}
         />
-        <Text style={[cinStyles.fallbackCat, { color: accent }]}>{category}</Text>
       </View>
     );
   }
@@ -576,18 +577,17 @@ const svcCardStyles = StyleSheet.create({
 function BottomNav({ accent }: { accent: string }) {
   const { setAppScreen } = useSessionStore();
   const navItems = [
-    { id: 'gallery', icon: '🖼', label: 'Our Work', action: () => setAppScreen('gallery') },
-    { id: 'products', icon: '🧴', label: 'Products', action: () => setAppScreen('products') },
-    { id: 'rewards', icon: '⭐', label: 'Rewards', action: () => {} },
-    { id: 'selfie', icon: '📸', label: 'Selfie', action: () => {} },
+    { id: 'gallery', label: 'OUR WORK', action: () => setAppScreen('gallery') },
+    { id: 'products', label: 'PRODUCTS', action: () => setAppScreen('products') },
+    { id: 'rewards', label: 'REWARDS', action: () => {} },
+    { id: 'selfie', label: 'SELFIE', action: () => {} },
   ];
 
   return (
     <View style={bnStyles.root}>
-      {navItems.map(item => (
-        <TouchableOpacity key={item.id} onPress={item.action} style={bnStyles.item} activeOpacity={0.75}>
-          <Text style={bnStyles.icon}>{item.icon}</Text>
-          <Text style={[bnStyles.label, { color: colors.muted }]}>{item.label}</Text>
+      {navItems.map((item, idx) => (
+        <TouchableOpacity key={item.id} onPress={item.action} style={[bnStyles.item, idx > 0 && bnStyles.itemBorder]} activeOpacity={0.75}>
+          <Text style={bnStyles.label}>{item.label}</Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -603,9 +603,9 @@ const bnStyles = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 20 : 8,
     paddingTop: 8,
   },
-  item: { flex: 1, alignItems: 'center', gap: 2 },
-  icon: { fontSize: 18 },
-  label: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 10, letterSpacing: 0.3 },
+  item: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 6 },
+  itemBorder: { borderLeftWidth: 1, borderLeftColor: colors.border },
+  label: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 10, color: colors.muted, letterSpacing: 1.2 },
 });
 
 function ServiceDrawer({ service, accent, accentDim, onClose, onAddToCart, isInCart }: {

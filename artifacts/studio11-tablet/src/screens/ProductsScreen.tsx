@@ -88,8 +88,7 @@ export default function ProductsScreen() {
 
       {permissionDenied ? (
         <View style={styles.centered}>
-          <Text style={styles.emptyIcon}>🔒</Text>
-          <Text style={styles.emptyTitle}>Storage Permission Required</Text>
+            <Text style={styles.emptyTitle}>Storage Permission Required</Text>
           <Text style={styles.emptyDesc}>
             This app needs access to your tablet's storage to display products.
           </Text>
@@ -108,7 +107,6 @@ export default function ProductsScreen() {
         </View>
       ) : products.length === 0 ? (
         <View style={styles.centered}>
-          <Text style={styles.emptyIcon}>📦</Text>
           <Text style={styles.emptyTitle}>No Products Yet</Text>
           <Text style={styles.emptyDesc}>
             Place product images in:{'\n'}
@@ -208,7 +206,6 @@ const styles = StyleSheet.create({
     color: colors.muted,
     marginTop: 12,
   },
-  emptyIcon: { fontSize: 52, marginBottom: 16 },
   emptyTitle: {
     fontFamily: 'BodoniModa_400Regular',
     fontSize: 24,

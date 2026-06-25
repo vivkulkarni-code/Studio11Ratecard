@@ -2,21 +2,20 @@ import type { CategoryName, Gender } from '../store/sessionStore';
 
 export interface CategoryConfig {
   name: CategoryName;
-  icon: string;
   shortName: string;
   genders: Gender[];
 }
 
 export const allCategories: CategoryConfig[] = [
-  { name: 'HAIR STYLING', icon: '✂️', shortName: 'Hair Styling', genders: ['MALE', 'FEMALE'] },
-  { name: 'HAIR TREATMENTS & SPAS', icon: '🌿', shortName: 'Hair Treats', genders: ['MALE', 'FEMALE'] },
-  { name: 'BODY TREATMENTS', icon: '🌸', shortName: 'Body Treats', genders: ['MALE', 'FEMALE'] },
-  { name: 'SKIN CARE', icon: '✨', shortName: 'Skin Care', genders: ['MALE', 'FEMALE'] },
-  { name: 'FACIALS', icon: '💆', shortName: 'Facials', genders: ['MALE', 'FEMALE'] },
-  { name: 'NAIL CARE', icon: '💅', shortName: 'Nail Care', genders: ['MALE', 'FEMALE'] },
-  { name: 'MAKE UP', icon: '💄', shortName: 'Make Up', genders: ['MALE', 'FEMALE'] },
-  { name: 'BRIDAL & GROMAL', icon: '👑', shortName: 'Bridal', genders: ['MALE', 'FEMALE'] },
-  { name: 'MASSAGES & BODY SPA', icon: '🕊️', shortName: 'Massage', genders: ['MALE', 'FEMALE'] },
+  { name: 'HAIR STYLING', shortName: 'Hair Styling', genders: ['MALE', 'FEMALE'] },
+  { name: 'HAIR TREATMENTS & SPAS', shortName: 'Hair Treats', genders: ['MALE', 'FEMALE'] },
+  { name: 'BODY TREATMENTS', shortName: 'Body Treats', genders: ['MALE', 'FEMALE'] },
+  { name: 'SKIN CARE', shortName: 'Skin Care', genders: ['MALE', 'FEMALE'] },
+  { name: 'FACIALS', shortName: 'Facials', genders: ['MALE', 'FEMALE'] },
+  { name: 'NAIL CARE', shortName: 'Nail Care', genders: ['MALE', 'FEMALE'] },
+  { name: 'MAKE UP', shortName: 'Make Up', genders: ['MALE', 'FEMALE'] },
+  { name: 'BRIDAL & GROMAL', shortName: 'Bridal', genders: ['MALE', 'FEMALE'] },
+  { name: 'MASSAGES & BODY SPA', shortName: 'Massage', genders: ['MALE', 'FEMALE'] },
 ];
 
 export function getCategoriesForGender(gender: Gender): CategoryConfig[] {

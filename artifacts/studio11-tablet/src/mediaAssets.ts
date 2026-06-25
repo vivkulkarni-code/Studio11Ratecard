@@ -17,7 +17,7 @@ export const maleCategoryVideos: Record<string, number> = {
   'HAIR STYLING_Styling': require('../../../attached_assets/Male_Cuts_1782364361295.mp4'),
   'HAIR STYLING_Colors': require('../../../attached_assets/Male_colors_1782244651541.mp4'),
   'HAIR STYLING': require('../../../attached_assets/Male_Cuts_1782364361295.mp4'),
-  'HAIR TREATMENTS & SPAS': require('../../../attached_assets/male_Hair_treatments_&_Spas2_1782364361261.mp4'),
+  'HAIR TREATMENTS & SPAS': require('../../../attached_assets/male_Hair_treatments_Spas2_1782364361261.mp4'),
   'BODY TREATMENTS': require('../../../attached_assets/Male_Body_treatments_1782364361317.mp4'),
   'SKIN CARE': require('../../../attached_assets/Male_Skin_Care_Mask_1782364361339.mp4'),
   'FACIALS': require('../../../attached_assets/Male_Facials_1782244651523.mp4'),
