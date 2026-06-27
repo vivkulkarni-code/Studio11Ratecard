@@ -2,11 +2,5 @@
   "buildCommand": "pnpm --filter @workspace/studio11 run build && cp -r artifacts/studio11/dist public",
   "outputDirectory": "public",
   "installCommand": "pnpm install",
-  "framework": null,
-  "build": {
-    "env": {
-      "PORT": "3000",
-      "BASE_PATH": "/"
-    }
-  }
+  "framework": null
 }
