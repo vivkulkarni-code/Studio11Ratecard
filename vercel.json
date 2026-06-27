@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm --filter @workspace/studio11 run build && cp -r artifacts/studio11/dist public",
+  "buildCommand": "pnpm --filter @workspace/studio11 run build && rm -rf public && cp -r artifacts/studio11/dist public",
   "outputDirectory": "public",
   "installCommand": "pnpm install",
   "framework": null
