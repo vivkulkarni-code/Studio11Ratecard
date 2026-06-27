@@ -1,0 +1,12 @@
+{
+  "buildCommand": "pnpm --filter @workspace/studio11 run build",
+  "outputDirectory": "artifacts/studio11/dist",
+  "installCommand": "pnpm install",
+  "framework": null,
+  "build": {
+    "env": {
+      "PORT": "3000",
+      "BASE_PATH": "/"
+    }
+  }
+}
